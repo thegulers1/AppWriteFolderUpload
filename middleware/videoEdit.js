@@ -15,7 +15,7 @@ function videoEdit(videoInputUrl, frameInputUrl, callback) {
     ffmpeg(tempVideoPath)
         .input(frameInputUrl)
         .complexFilter([ 
-            "[0:v][1:v] overlay=W-w-10:H-h-10"
+            "[0:v][1:v] overlay=W-w-0:H-h-10"
         ])
         .output(videoOutput)
         .on('end', () => {
