@@ -26,6 +26,8 @@ const upload = multer({ storage: storage });
 app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Sunucu başlatıldığında videolar listesini oluştur
 function refreshVideoList() {
   fs.readdir('uploads', (err, files) => {
