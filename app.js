@@ -53,6 +53,20 @@ app.get('/qr/:video', async (req, res) => {
   }
 });
 
+// app.post('/upload', upload.single('video'), (req, res) => {
+//   const videoPath = path.resolve(req.file.path);
+//   const framePath = path.resolve(__dirname, 'overlay.png'); // Use __dirname to get the current directory
+
+//   videoEdit(videoPath, framePath, (outputPath) => {
+//       // Çıktı dosya yoluyla videoList'i güncelle
+//       const outputFilename = path.basename(outputPath);
+//       videoList.push(outputFilename);
+
+//       // Yeni video olayını yayınla ve /index2 sayfasına yönlendir
+//       io.emit('new_video', outputFilename);
+//       res.redirect('/index2');
+//   });
+// });
 app.post('/upload', upload.single('video'), (req, res) => {
   const videoPath = path.resolve(req.file.path);
   const framePath = path.resolve(__dirname, 'overlay.png'); // Use __dirname to get the current directory
@@ -61,10 +75,9 @@ app.post('/upload', upload.single('video'), (req, res) => {
       // Çıktı dosya yoluyla videoList'i güncelle
       const outputFilename = path.basename(outputPath);
       videoList.push(outputFilename);
-
       // Yeni video olayını yayınla ve /index2 sayfasına yönlendir
       io.emit('new_video', outputFilename);
-      res.redirect('/index2');
+      res.redirect('/');
   });
 });
 

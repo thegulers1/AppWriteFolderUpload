@@ -7,28 +7,45 @@
   <title>Index 2</title>
   <style>
     body {
-      padding: 8% 5%;
-      background-color: #f0f0f0;
+      padding: 8% 20%;
+      background-color: #ffffff;
     }
 
     #videoList {
       display: flex;
       flex-wrap: wrap;
+      justify-content: space-between;
+      /* Video öğelerini sağa ve sola yasla */
+      margin-right: -15px;
+      /* Sağdan boşluk */
+      margin-left: -15px;
+      /* Soldan boşluk */
     }
 
     .videoWrapper {
-      flex: 1 1 calc(33.333% - 10px);
-      margin: 5px;
+      flex: calc(33.3% - 28px);
+      margin: 0;
       position: relative;
-      background-color: #fff;
       overflow: hidden;
       cursor: pointer;
+      max-width: calc(33.3% - 0px);
+      box-sizing: border-box;
+      padding: 0;
+      text-align: center;
     }
 
     .videoWrapper video {
-      width: 100%;
-      height: auto;
+      /* width: 540px; 
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: 0 auto; */
+      width: 396px;
+      max-width: 100%;
+      max-height: 83%;
       display: block;
+      margin: 0 auto;
+
     }
 
     #popup {
@@ -57,21 +74,15 @@
       padding: 10px 20px;
       cursor: pointer;
       font-size: 3.5em;
-      /* Font boyutunu büyüt */
       font-weight: bold;
-      /* Fontu kalın yap */
       background: rgba(0, 0, 0, -0.2)
     }
 
     #qrButton {
       position: fixed;
-      /* pozisyonu sabitlemek için 'fixed' kullan */
       top: 50%;
-      /* yukarıdan %50 uzaklıkta */
       left: 0;
-      /* soldan 0 uzaklıkta, yani tam sol kenar */
       transform: translateY(-50%);
-      /* Y ekseninde -%50 çevirme ile düğmeyi dikey olarak ortala */
       background-color: transparent;
       border: 6px solid #f2f2f2;
       color: #f2f2f2;
@@ -98,11 +109,29 @@
       background-color: #fff;
       padding: 20px;
     }
+    #refreshButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  cursor: pointer;
+}
+
+#refreshButton svg {
+  fill: #fff; /* Düğme rengini ayarlayın */
+  width: 54px;
+  height: 54px;
+}
+
   </style>
 </head>
 
 <body>
-
+  <div id="refreshButton" onclick="refreshPage()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+      <path <path xmlns="http://www.w3.org/2000/svg" d="M4.06189 13C4.02104 12.6724 4 12.3387 4 12C4 7.58172 7.58172 4 12 4C14.5006 4 16.7332 5.14727 18.2002 6.94416M19.9381 11C19.979 11.3276 20 11.6613 20 12C20 16.4183 16.4183 20 12 20C9.61061 20 7.46589 18.9525 6 17.2916M9 17H6V17.2916M18.2002 4V6.94416M18.2002 6.94416V6.99993L15.2002 7M6 20V17.2916" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  
   <div id="videoList">
     <% videoList.forEach(function(video) { %>
       <div class="videoWrapper" onclick="openPopup('<%= video %>')">
@@ -111,79 +140,82 @@
         </video>
       </div>
       <% }); %>
-  </div>
 
-  <div id="popup" onclick="closePopup()">
-    <button id="closeButton" onclick="closePopup()">×</button> <!-- Çıkış yazısını çarpı simgesi (×) ile değiştir -->
-    <video controls id="popupVideo"></video>
-    <button id="qrButton" onclick="event.stopPropagation(); openQrPopup();">QR</button>
-    <!-- Video pop-up'ında QR düğmesi -->
-    <div id="qrPopup" onclick="closeQrPopup()">
-      <div id="qrContent" onclick="event.stopPropagation();">
-        <img id="qrImage" src="" alt="QR Code">
-      </div>
-    </div>
+        <div id="popup" onclick="closePopup()">
+          <button id="closeButton" onclick="closePopup()">×</button>
+          <!-- Çıkış yazısını çarpı simgesi (×) ile değiştir -->
+          <video controls id="popupVideo"></video>
+          <button id="qrButton" onclick="event.stopPropagation(); openQrPopup();">QR</button>
+          <!-- Video pop-up'ında QR düğmesi -->
+          <div id="qrPopup" onclick="closeQrPopup()">
+            <div id="qrContent" onclick="event.stopPropagation();">
+              <img id="qrImage" src="" alt="QR Code">
+            </div>
+          </div>
 
-  </div>
+        </div>
 
-  <!-- QR Button ve QR Pop-up -->
+        <!-- QR Button ve QR Pop-up -->
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    var socket = io();
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+          var socket = io();
 
-    function openPopup(videoSrc) {
-      var popup = document.getElementById('popup');
-      var popupVideo = document.getElementById('popupVideo');
-      popup.style.display = 'flex';
-      popupVideo.src = '/' + videoSrc;
-    }
+          function openPopup(videoSrc) {
+            var popup = document.getElementById('popup');
+            var popupVideo = document.getElementById('popupVideo');
+            popup.style.display = 'flex';
+            popupVideo.src = '/' + videoSrc;
+          }
 
-    function closePopup() {
-      var popup = document.getElementById('popup');
-      var popupVideo = document.getElementById('popupVideo');
-      popup.style.display = 'none';
-      popupVideo.src = '';
-    }
-    socket.on('new_video', function (filename) {
-      // Yeni video eklendiğinde DOM'u güncelle
-      var videoList = document.getElementById('videoList');
-      var newVideoWrapper = document.createElement('div');
-      newVideoWrapper.className = 'videoWrapper';
-      newVideoWrapper.onclick = function () { openPopup(filename); };
+          function closePopup() {
+            var popup = document.getElementById('popup');
+            var popupVideo = document.getElementById('popupVideo');
+            popup.style.display = 'none';
+            popupVideo.src = '';
+          }
+          socket.on('new_video', function (filename) {
+            // Yeni video eklendiğinde DOM'u güncelle
+            var videoList = document.getElementById('videoList');
+            var newVideoWrapper = document.createElement('div');
+            newVideoWrapper.className = 'videoWrapper';
+            newVideoWrapper.onclick = function () { openPopup(filename); };
 
-      var newVideo = document.createElement('video');
-      newVideo.preload = 'metadata';
+            var newVideo = document.createElement('video');
+            newVideo.preload = 'metadata';
 
-      var newSource = document.createElement('source');
-      newSource.src = '/' + filename;
-      newSource.type = 'video/mp4';
+            var newSource = document.createElement('source');
+            newSource.src = '/' + filename;
+            newSource.type = 'video/mp4';
 
-      newVideo.appendChild(newSource);
-      newVideoWrapper.appendChild(newVideo);
-      videoList.appendChild(newVideoWrapper);
-    });
+            newVideo.appendChild(newSource);
+            newVideoWrapper.appendChild(newVideo);
+            videoList.appendChild(newVideoWrapper);
+          });
 
-    async function openQrPopup() {
-      const qrPopup = document.getElementById('qrPopup');
-      const qrImage = document.getElementById('qrImage');
-      const videoSrc = document.getElementById('popupVideo').src;
-      const videoFilename = videoSrc.substring(videoSrc.lastIndexOf('/') + 1);
-      try {
-        const response = await fetch(`/qr/${videoFilename}`);
-        const data = await response.json();
-        qrImage.src = data.qrSvg;
-        qrPopup.style.display = 'flex';
-      } catch (error) {
-        console.error('Error fetching QR code:', error);
-      }
-    }
+          async function openQrPopup() {
+            const qrPopup = document.getElementById('qrPopup');
+            const qrImage = document.getElementById('qrImage');
+            const videoSrc = document.getElementById('popupVideo').src;
+            const videoFilename = videoSrc.substring(videoSrc.lastIndexOf('/') + 1);
+            try {
+              const response = await fetch(`/qr/${videoFilename}`);
+              const data = await response.json();
+              qrImage.src = data.qrSvg;
+              qrPopup.style.display = 'flex';
+            } catch (error) {
+              console.error('Error fetching QR code:', error);
+            }
+          }
 
-    function closeQrPopup() {
-      const qrPopup = document.getElementById('qrPopup');
-      qrPopup.style.display = 'none';
-    }
-  </script>
+          function closeQrPopup() {
+            const qrPopup = document.getElementById('qrPopup');
+            qrPopup.style.display = 'none';
+          }
+          function refreshPage() {
+            window.location.reload();
+          }
+        </script>
 </body>
 
 </html>
